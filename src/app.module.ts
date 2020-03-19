@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { IdeaModule } from './idea/idea.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { AppService } from './app.service';
       autoLoadEntities: true,
       synchronize: true,
       logging: true
-    })
+    }),
+    IdeaModule
   ],
   controllers: [AppController],
   providers: [AppService],
