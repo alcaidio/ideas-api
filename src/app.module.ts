@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { IdeaModule } from './idea/idea.module';
+import { HttpErrorFilter } from './shared/http-error.filter';
+import { LoggingInterceptor } from './shared/logging.interceptor';
 
 @Module({
   imports: [
@@ -21,8 +23,16 @@ import { IdeaModule } from './idea/idea.module';
     IdeaModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpErrorFilter
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor
+    }
+  ],
 })
-export class AppModule {
-  constructor(private connection: Connection) { }
-}
+export class AppModule { }
