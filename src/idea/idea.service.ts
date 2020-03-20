@@ -28,9 +28,10 @@ export class IdeaService {
     }
 
     async update(id: string, data: Partial<IdeaDTO>) {
-        const idea = this.ideaRepository.findOne({ id })
+        let idea = await this.ideaRepository.findOne({ where: { id } })
         if (!idea) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
         await this.ideaRepository.update({ id }, data)
+        idea = await this.ideaRepository.findOne({ where: { id } })
         return idea
     }
 
