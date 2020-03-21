@@ -9,7 +9,6 @@ export class AuthGuard implements CanActivate {
         return true
     }
 
-
     private async validateToken(auth: string) {
         const splited_token = auth.split(' ')
 
