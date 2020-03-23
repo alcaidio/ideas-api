@@ -16,5 +16,6 @@ export interface UserRO {
     username: string,
     created: Date,
     ideas?: IdeaEntity[],
+    bookmarks?: IdeaEntity[],
     token?: string
 }

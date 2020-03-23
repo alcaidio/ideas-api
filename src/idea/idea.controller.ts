@@ -10,13 +10,6 @@ export class IdeaController {
 
     constructor(private ideaService: IdeaService) { }
 
-    private logData(options: any) {
-        const logger = new Logger('IdeaController')
-        if (options.user) return logger.log('USER' + JSON.stringify(options.user))
-        if (options.body) return logger.log('BODY' + JSON.stringify(options.body))
-        if (options.id) return logger.log('IDEA' + JSON.stringify(options.id))
-    }
-
     @Get()
     showAllIdeas() {
         return this.ideaService.showAll()
@@ -51,6 +44,28 @@ export class IdeaController {
     detroyIdea(@Param('id') id: string, @User('id') userId: string) {
         this.logData({ id, userId })
         return this.ideaService.destroy(id, userId)
+    }
+
+
+    @Post(':id/bookmark')
+    @UseGuards(new AuthGuard())
+    bookmarkIdea(@Param('id') id: string, @User('id') userId: string) {
+        this.logData({ id, userId })
+        return this.ideaService.bookmark(id, userId)
+    }
+
+    @Delete(':id/bookmark')
+    @UseGuards(new AuthGuard())
+    unbookmarkIdea(@Param('id') id: string, @User('id') userId: string) {
+        this.logData({ id, userId })
+        return this.ideaService.unbookmark(id, userId)
+    }
+
+    private logData(options: any) {
+        const logger = new Logger('IdeaController')
+        if (options.user) return logger.log('USER' + JSON.stringify(options.user))
+        if (options.body) return logger.log('BODY' + JSON.stringify(options.body))
+        if (options.id) return logger.log('IDEA' + JSON.stringify(options.id))
     }
 
 }
