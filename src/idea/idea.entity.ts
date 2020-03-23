@@ -1,5 +1,6 @@
 import { UserEntity } from "src/user/user.entity";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { CommentEntity } from './../comment/comment.entity';
 
 @Entity('idea')
 export class IdeaEntity {
@@ -28,5 +29,9 @@ export class IdeaEntity {
     @ManyToMany(type => UserEntity, { cascade: true })
     @JoinTable()
     downvotes: UserEntity[]
+
+    // Cascade because if an idea are deleted, all associated comments are deleted too
+    @OneToMany(type => CommentEntity, comment => comment.idea, { cascade: true })
+    comments: CommentEntity[]
 
 }

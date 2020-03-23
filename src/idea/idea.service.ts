@@ -17,7 +17,7 @@ export class IdeaService {
     ) { }
 
     async showAll(): Promise<IdeaRO[]> {
-        const ideas = await this.ideaRepository.find({ relations: ['author', 'upvotes', 'downvotes'] })
+        const ideas = await this.ideaRepository.find({ relations: ['author', 'upvotes', 'downvotes', 'comments'] })
         return ideas.map(idea => this.toResponseObject(idea))
     }
 
@@ -29,37 +29,37 @@ export class IdeaService {
     }
 
     async read(id: string): Promise<IdeaRO> {
-        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes'] })
-        if (!idea) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes', 'comments'] })
+        if (!idea) throw new HttpException('Idea not found', HttpStatus.NOT_FOUND)
         return this.toResponseObject(idea)
     }
 
     async update(id: string, userId: string, data: Partial<IdeaDTO>): Promise<IdeaRO> {
         let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author'] })
-        if (!idea) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+        if (!idea) throw new HttpException('Idea not found', HttpStatus.NOT_FOUND)
         this.ensureOwnership(idea, userId)
         await this.ideaRepository.update({ id }, data)
-        idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author'] })
+        idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'comments'] })
         return this.toResponseObject(idea)
     }
 
     async destroy(id: string, userId: string): Promise<IdeaRO> {
-        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author'] })
-        if (!idea) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'comments'] })
+        if (!idea) throw new HttpException('Idea not found', HttpStatus.NOT_FOUND)
         this.ensureOwnership(idea, userId)
         await this.ideaRepository.delete({ id })
         return this.toResponseObject(idea)
     }
 
     async upvote(id: string, userId: string) {
-        let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes'] })
+        let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes', 'comments'] })
         const user = await this.userRepository.findOne({ where: { id: userId } })
         idea = await this.vote(idea, user, Votes.UP)
         return this.toResponseObject(idea)
     }
 
     async downvote(id: string, userId: string) {
-        let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes'] })
+        let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes', 'comments'] })
         const user = await this.userRepository.findOne({ where: { id: userId } })
         idea = await this.vote(idea, user, Votes.DOWN)
         return this.toResponseObject(idea)
