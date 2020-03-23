@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Logger, Param, Post, UseGuards, UsePipes, Delete } from '@nestjs/common';
 import { AuthGuard } from 'src/shared/auth.guard';
 import { ValidationPipe } from 'src/shared/validation.pipe';
-import { User } from 'src/user/user.decorator';
+import { User } from 'src/shared/user.decorator';
 import { CommentDTO } from './comment.dto';
 import { CommentService } from './comment.service';
 

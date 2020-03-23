@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, Put, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthGuard } from 'src/shared/auth.guard';
-import { User } from 'src/user/user.decorator';
+import { User } from 'src/shared/user.decorator';
 import { ValidationPipe } from '../shared/validation.pipe';
 import { IdeaDTO } from './idea.dto';
 import { IdeaService } from './idea.service';

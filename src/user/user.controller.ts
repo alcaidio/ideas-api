@@ -13,6 +13,11 @@ export class UserController {
         return this.userService.showAll()
     }
 
+    @Get('api/users')
+    showUser() {
+        return this.userService.showAll()
+    }
+
     @Post('login')
     @UsePipes(new ValidationPipe())
     login(@Body() data: UserDTO) {
