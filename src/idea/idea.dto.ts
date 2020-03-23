@@ -16,4 +16,6 @@ export interface IdeaRO {
     idea: string,
     description: string,
     author: UserRO,
+    upvote?: number,
+    downvote?: number
 }

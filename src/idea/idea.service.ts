@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserRO } from 'src/user/user.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
+import { Votes } from './../shared/votes.enum';
 import { IdeaDTO, IdeaRO } from './idea.dto';
 import { IdeaEntity } from './idea.entity';
 
@@ -14,8 +16,8 @@ export class IdeaService {
         private userRepository: Repository<UserEntity>
     ) { }
 
-    async showAll() {
-        const ideas = await this.ideaRepository.find({ relations: ['author'] })
+    async showAll(): Promise<IdeaRO[]> {
+        const ideas = await this.ideaRepository.find({ relations: ['author', 'upvotes', 'downvotes'] })
         return ideas.map(idea => this.toResponseObject(idea))
     }
 
@@ -27,7 +29,7 @@ export class IdeaService {
     }
 
     async read(id: string): Promise<IdeaRO> {
-        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author'] })
+        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes'] })
         if (!idea) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
         return this.toResponseObject(idea)
     }
@@ -46,6 +48,20 @@ export class IdeaService {
         if (!idea) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
         this.ensureOwnership(idea, userId)
         await this.ideaRepository.delete({ id })
+        return this.toResponseObject(idea)
+    }
+
+    async upvote(id: string, userId: string) {
+        let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes'] })
+        const user = await this.userRepository.findOne({ where: { id: userId } })
+        idea = await this.vote(idea, user, Votes.UP)
+        return this.toResponseObject(idea)
+    }
+
+    async downvote(id: string, userId: string) {
+        let idea = await this.ideaRepository.findOne({ where: { id }, relations: ['author', 'upvotes', 'downvotes'] })
+        const user = await this.userRepository.findOne({ where: { id: userId } })
+        idea = await this.vote(idea, user, Votes.DOWN)
         return this.toResponseObject(idea)
     }
 
@@ -90,5 +106,26 @@ export class IdeaService {
         if (idea.author.id !== userId) {
             throw new HttpException('Incorrect user', HttpStatus.UNAUTHORIZED)
         }
+    }
+
+    private async vote(idea: IdeaEntity, user: UserEntity, vote: Votes) {
+        const opposite = vote === Votes.UP ? Votes.DOWN : Votes.UP
+        const voteLength = idea[vote].filter(voter => voter.id === user.id).length
+        const oppositeLength = idea[opposite].filter(voter => voter.id === user.id).length
+
+        if (voteLength < 1 && oppositeLength < 1) {
+            idea[vote].push(user)
+            await this.ideaRepository.save(idea)
+        } else if (voteLength > 0 && oppositeLength < 1) {
+            idea[vote] = idea[vote].filter(voter => voter.id !== user.id)
+            await this.ideaRepository.save(idea)
+        } else if (voteLength < 1 && oppositeLength > 0) {
+            idea[opposite] = idea[opposite].filter(voter => voter.id !== user.id)
+            await this.ideaRepository.save(idea)
+        } else {
+            throw new HttpException('Unable to cast vote', HttpStatus.BAD_REQUEST)
+        }
+
+        return idea
     }
 }
