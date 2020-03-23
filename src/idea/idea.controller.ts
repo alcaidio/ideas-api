@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Logger, Param, Post, Put, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthGuard } from 'src/shared/auth.guard';
 import { User } from 'src/shared/user.decorator';
-import { ValidationPipe } from '../shared/validation.pipe';
+import { CustomValidationPipe } from '../shared/custom-validation.pipe';
 import { IdeaDTO } from './idea.dto';
 import { IdeaService } from './idea.service';
 
@@ -17,7 +17,7 @@ export class IdeaController {
 
     @Post()
     @UseGuards(new AuthGuard())
-    @UsePipes(new ValidationPipe())
+    @UsePipes(new CustomValidationPipe())
     createIdea(@User('id') userId: string, @Body() data: IdeaDTO) {
         this.logData({ userId, data })
         return this.ideaService.create(userId, data)
@@ -30,7 +30,7 @@ export class IdeaController {
 
     @Put(':id')
     @UseGuards(new AuthGuard())
-    @UsePipes(new ValidationPipe())
+    @UsePipes(new CustomValidationPipe())
     updateIdea(
         @Param('id') id: string,
         @User('id') userId: string,

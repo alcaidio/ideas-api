@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Logger, Param, Post, UseGuards, UsePipes, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Post, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthGuard } from 'src/shared/auth.guard';
-import { ValidationPipe } from 'src/shared/validation.pipe';
+import { CustomValidationPipe } from 'src/shared/custom-validation.pipe';
 import { User } from 'src/shared/user.decorator';
 import { CommentDTO } from './comment.dto';
 import { CommentService } from './comment.service';
@@ -34,7 +34,7 @@ export class CommentController {
 
     @Post('idea/:id')
     @UseGuards(new AuthGuard())
-    @UsePipes(new ValidationPipe())
+    @UsePipes(new CustomValidationPipe())
     createComment(
         @Param('id') idea: string,
         @User('id') user: string,
