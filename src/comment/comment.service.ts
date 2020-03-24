@@ -17,9 +17,12 @@ export class CommentService {
         private userRepository: Repository<UserEntity>,
     ) { }
 
+    private PAGINATION: number = 5
+
     async showAll(): Promise<CommentRO[]> {
         const comments = await this.commentRepository.find()
-        if (comments.length < 1) throw new HttpException('Comments not found', HttpStatus.NOT_FOUND)
+        if (!comments) throw new HttpException('Comments not found', HttpStatus.NOT_FOUND)
+        if (comments.length < 1) console.error('Comment exist but is null')
         return comments.map(comment => this.toResponseObject(comment))
     }
 
@@ -29,14 +32,24 @@ export class CommentService {
         return this.toResponseObject(comment)
     }
 
-    async showByIdea(id: string): Promise<CommentRO[]> {
-        const idea = await this.ideaRepository.findOne({ where: { id }, relations: ['comments', 'comments.author', 'comments.idea'] })
-        if (idea.comments.length < 1) throw new HttpException('Comments not found for this idea', HttpStatus.NOT_FOUND)
-        return idea.comments.map(comment => this.toResponseObject(comment))
+    async showByIdea(id: string, page: number = 1): Promise<CommentRO[]> {
+        const comments = await this.commentRepository.find({
+            where: { idea: { id } },
+            relations: ['author'],
+            take: this.PAGINATION,
+            skip: this.PAGINATION * (page - 1)
+        })
+        if (!comments) throw new HttpException('Comments not found for this idea', HttpStatus.NOT_FOUND)
+        return comments.map(comment => this.toResponseObject(comment))
     }
 
-    async showByUser(id: string): Promise<CommentRO[]> {
-        const comments = await this.commentRepository.find({ where: { author: { id } }, relations: ['author'] })
+    async showByUser(id: string, page: number = 1): Promise<CommentRO[]> {
+        const comments = await this.commentRepository.find({
+            where: { author: { id } },
+            relations: ['author'],
+            take: this.PAGINATION,
+            skip: this.PAGINATION * (page - 1)
+        })
         if (!comments) throw new HttpException('Comments not found for this user', HttpStatus.NOT_FOUND)
         return comments.map(comment => this.toResponseObject(comment))
     }

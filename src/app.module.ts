@@ -3,12 +3,12 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { CommentModule } from './comment/comment.module';
 import { IdeaModule } from './idea/idea.module';
 import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,7 +21,8 @@ import { AuthModule } from './auth/auth.module';
       database: 'ideas',
       autoLoadEntities: true,
       synchronize: true,
-      logging: true
+      logging: true,
+      // dropSchema: true
     }),
     IdeaModule,
     UserModule,
